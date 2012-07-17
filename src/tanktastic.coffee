@@ -6,23 +6,25 @@ class Game
 		@dt2 = @dt * @dt
 		@r = 300
 
-	init: -> tank.init for tank in @tanks
+	init: -> tank.init @tanks.length - 1 for tank in @tanks
 
 	step: ->
-		tank.step @dt, tank.state, radar for tank in @tanks
-		fire()
-		integrate()
-		resolve_collisons()
-		@tanks = @tanks.filter (tank) -> tank.life > 0
+		tanks = @tanks.filter (tank) -> tank.life > 0
+		end_game() if tanks.length < 2
+		tank.step @dt, tank.to_state(), radar tank, tanks for tank in tanks
+		fire tanks
+		integrate tanks
+		resolve_collisons tanks
 		@bullets = @bullets.filter (bullet) -> not bullet.dead
-		end_game() if @tanks.length < 2
 
-	integrate: ->
+	radar: (tank, tanks) ->	{x:t.x, y:t.y} for t in tanks when t isnt tank
+
+	integrate: (tanks) ->
 		for bullet in bullets
 			bullet.x += bullet.vx * @dt
 			bullet.y += bullet.vy * @dt
 
-		for tank in @tanks
+		for tank in tanks
 			# adds drag
 			tank.fx -= tank.vx * 0.03
 			tank.fy -= tank.vy * 0.03
@@ -32,12 +34,13 @@ class Game
 			tank.x	+= tank.vx * @dt + tank.fx * @dt2
 			tank.y	+= tank.vy * @dt + tank.fy * @dt2
 
-	fire: ->
-		if tank.gun_heat <= tank.fire_command
-			bullet = new Bullet(tank, tank.fire_command, tank.x, tank.y, tank.fx, tank.fy)
-			tank.gun_heat += tank.fire_command
-			@bullets.push bullet
-		else tank.gun_heat -= @dt
+	fire: (tanks) ->
+		for tank in tanks
+			if tank.gun_heat <= tank.fire_command
+				bullet = new Bullet(tank, tank.fire_command, tank.x, tank.y, tank.fx, tank.fy)
+				tank.gun_heat += tank.fire_command
+				@bullets.push bullet
+			else tank.gun_heat -= @dt
 
 	resolve_collisions: ->
 		for bullet in bullets
@@ -45,7 +48,7 @@ class Game
 				unless bullet.tank is tank
 					dx = bullet.x - tank.x
 					dy = bullet.y - tank.y
-					if dx * dx + dy * dy < tank.r + bullet.r
+					if dx * dx + dy * dy < tank.r * tank.r + bullet.r * bullet.r
 						bullet.dead = true
 						tank.life -= bullet.power
 						bullet.tank.score += bullet.power
@@ -58,16 +61,22 @@ class Game
 class Tank
 
 	to_state: (opponents, r) ->
+		@fx = @fy = 0.0
 		x: @x
 		y: @y
 		radius: @r
 		vx: @vx
 		vy: @vy
-		fx: 0.0
-		fy: 0.0
+		turn: (bearing) => @theta += bearing
+		apply: (fx, fy) => 
+			@fx += fx
+			@fy += fy
+		fire: (power) =>
+			this.fire_command = Math.min(Math.max(0.1, power), 5.0)
 		theta: @theta
 		radar: opponents
 		arena_radius: r
 		gun_heat: @gun_heat
 		life: @life
 		score: @score
+
