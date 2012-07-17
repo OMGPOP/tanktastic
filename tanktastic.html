@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Tanktastic!</title>
+
+	<script type="text/javascript" src="lib/easeljs-0.4.2.min.js"></script>
+	<script type="text/javascript" src="lib/tanktastic.js"></script>
+
+    <script>
+        var stage;
+        var game;
+        function init()
+        {
+          stage = new Stage("myCanvas");
+          var shape = new Shape();
+          shape.x = shape.y = 305;
+          stage.addChild(shape);
+          game = new Game(1, shape.graphics);
+          game.register_tank("t1", t1_step);
+          game.register_tank("t2", t2_step);
+          Ticker.addListener(window);
+        }
+
+        function tick()
+        {
+          game.step();
+          stage.update();
+        }
+
+        function t1_step(dt, state)
+        {
+          state.apply(-state.x, -state.y);
+          var op = state.radar[0];
+          var theta = Math.atan2(op.y - state.y, op.x - state.x);
+          state.turn(theta - state.bearing);
+          state.fire(0.2);
+        }
+        
+        function t2_step(dt, state)
+        {
+          state.apply(-state.x, -state.y);
+          var op = state.radar[0];
+          var theta = Math.atan2(op.y - state.y, op.x - state.x);
+          state.turn(theta - state.bearing);
+          state.fire(5.0);
+        }
+
+
+    </script>
+</head>
+<body onload="init();">
+	<canvas id="myCanvas" width="610" height="610"></canvas>
+</body>
+</html>
