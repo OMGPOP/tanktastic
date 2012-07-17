@@ -1,7 +1,8 @@
 root = exports ? this
 
-RADIUS = 300
-RADIUS2 = RADIUS * RADIUS
+WIDTH = 960
+HEIGHT = 480
+
 DBEARING_MAX = Math.PI / 4
 MAX_SENSOR_NOISE = 28
 
@@ -25,20 +26,23 @@ class root.Game
 
   step: ->
     tanks = @tanks.filter (tank) -> tank.life > 0
-    @end_game() if tanks.length < 2
+    if tanks.length < 2
+      return
+      end_game()
     @lt = new Date().getTime() unless @lt > 0
     now = new Date().getTime()
     dt = (now - @lt) / 1000.0
     @a += dt
+    tank.hit = false for tank in tanks
     until @a < @dt
       tank.step @dt, @radar(tank, tanks) for tank in tanks
       @fire tanks
       @integrate tanks
       @resolve_collisions tanks
       @bullets = @bullets.filter (bullet) -> not bullet.dead
-      @renderer.render(tanks, @bullets) if @renderer
       @a -= @dt
     @lt = now
+    @renderer.render(tanks, @bullets) if @renderer
 
 
 
@@ -55,11 +59,11 @@ class root.Game
 
     for tank in tanks
       # adds drag
-      tank.fx -= tank.vx * 0.03
-      tank.fy -= tank.vy * 0.03
+      tank.fx -= tank.vx * 0.4
+      tank.fy -= tank.vy * 0.4
       # unit mass -> a = f/1 = f
-      dx = Math.min(Math.max(tank.vx * @dt + 0.5 * tank.fx * @dt2, -5), 5)
-      dy = Math.min(Math.max(tank.vy * @dt + 0.5 * tank.fy * @dt2, -5), 5)
+      dx = Math.min(Math.max(tank.vx * @dt + 0.5 * tank.fx * @dt2, -50), 50)
+      dy = Math.min(Math.max(tank.vy * @dt + 0.5 * tank.fy * @dt2, -50), 50)
       #dy = tank.vy * @dt + 0.5 * tank.fy * @dt2
       tank.vx = dx / @dt
       tank.vy = dy / @dt
@@ -70,7 +74,7 @@ class root.Game
   fire: (tanks) ->
     for tank in tanks
       if tank.gun_heat <= tank.fire_command
-        bullet = new Bullet(tank, tank.fire_command, tank.x, tank.y, tank.fx, tank.fy)
+        bullet = new Bullet(tank, tank.fire_command)
         tank.gun_heat += tank.fire_command
         @bullets.push bullet
       else tank.gun_heat -= @dt
@@ -83,7 +87,7 @@ class root.Game
         dx = tj.x - ti.x
         dy = tj.y - ti.y
         len2 = dx * dx + dy * dy
-        if len2 <= (ti.r + tj.r) * (ti.r + tj.r)#ti.r * ti.r + tj.r * tj.r
+        if len2 <= (ti.r + tj.r) * (ti.r + tj.r)
           len = Math.sqrt len2
           dx /= len
           dy /= len
@@ -100,20 +104,32 @@ class root.Game
           tj.vx += dx * impulse
           tj.vy += dy * impulse
 
+    for tank in tanks
+      dx = 0
+      dy = 0
+      dx = 1 if tank.x <= tank.r
+      dx = -1 if tank.x >= WIDTH - tank.r
+      dy = 1 if tank.y <= tank.r
+      dy = -1 if tank.y >= HEIGHT - tank.r
+      if dx
+        tank.x += dx
+        tank.vx *= -0.51
+      if dy
+        tank.y += dy
+        tank.vy *= -0.51
 
     for bullet in @bullets
       for tank in tanks
         unless bullet.tank is tank
           dx = bullet.x - tank.x
           dy = bullet.y - tank.y
-          if dx * dx + dy * dy < tank.r * tank.r + bullet.r * bullet.r
+          if dx * dx + dy * dy <= (tank.r + bullet.r) * (tank.r + bullet.r)
             bullet.dead = true
             tank.life -= bullet.power
             tank.hit = true
             bullet.tank.score += bullet.power
-            console.log tank.life
             break
-      bullet.dead = true if bullet.x * bullet.x + bullet.y * bullet.y >= @r
+      bullet.dead = true if bullet.x > WIDTH || bullet.x < 0 || bullet.y < 0 || bullet.y > HEIGHT
 
   end_game: -> alert "End of game."
 
@@ -122,10 +138,10 @@ class Tank
 
   constructor: (@name, @step_target, @init_target) ->
     @r = 20
-    rc = Math.random() * 0x88 | (Math.random() * 0x88) << 8 | (Math.random() * 0x88) << 16
+    rc = Math.random() * 0xBB | (Math.random() * 0xBB) << 8 | (Math.random() * 0xBB) << 16
     @color = "#" + rc.toString(16)
-    @x = Math.random() * (RADIUS - 2 * @r)
-    @y = Math.random() * (RADIUS - 2 * @r)
+    @x = Math.random() * (WIDTH - 2 * @r)
+    @y = Math.random() * (HEIGHT - 2 * @r)
     @vx = @vy = @gun_heat = @score = 0
     @life = 100
     @bearing = Math.random() * 2 * Math.PI
@@ -133,7 +149,6 @@ class Tank
   init: (num_tanks) -> @init_target num_tanks if @init_target
 
   step: (dt, radar) -> 
-    @hit = false
     @fx = @fy = @dbearing = 0
     @step_target.apply(null, [dt, @to_state(radar)])
 
@@ -146,14 +161,13 @@ class Tank
     vx: @vx
     vy: @vy
     turn: (bearing) => tank.dbearing = Math.min(Math.max(-DBEARING_MAX, bearing), DBEARING_MAX)
-    apply: (fx, fy) =>
+    exert: (fx, fy) =>
       tank.fx += fx
       tank.fy += fy
     fire: (power) =>
       tank.fire_command = Math.min(Math.max(0.1, power.toFixed(1)), 5.0)
     bearing: @bearing
     radar: radar
-    arena_radius: RADIUS
     gun_heat: @gun_heat
     life: @life
     score: @score
@@ -174,12 +188,14 @@ class Renderer
   
   render: (tanks, bullets) ->
     @graphics.clear()
+    @graphics.setStrokeStyle 4, "round"
+    @graphics.beginStroke "#000000"
     @render_tank tank for tank in tanks
     @render_bullet bullet for bullet in bullets
 
   render_bullet: (bullet) ->
     @graphics.beginStroke bullet.tank.color
-    @graphics.drawCircle bullet.x, bullet.y, bullet.r
+    @graphics.drawCircle bullet.x, bullet.y, 1 + Math.log(2 + bullet.r)
     @graphics.endStroke()
 
   render_tank: (tank) ->

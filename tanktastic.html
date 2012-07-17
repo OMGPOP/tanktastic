@@ -14,7 +14,6 @@
         {
           stage = new Stage("myCanvas");
           var shape = new Shape();
-          shape.x = shape.y = 305;
           stage.addChild(shape);
           game = new Game(1, shape.graphics);
           game.register_tank("t1", t1_step);
@@ -30,7 +29,7 @@
 
         function t1_step(dt, state)
         {
-          state.apply(-state.x, -state.y);
+          state.exert(480-state.x, 240-state.y);
           var op = state.radar[0];
           var theta = Math.atan2(op.y - state.y, op.x - state.x);
           state.turn(theta - state.bearing);
@@ -39,17 +38,17 @@
         
         function t2_step(dt, state)
         {
-          state.apply(-state.x, -state.y);
+          state.exert(100, 0);//480-state.x, 240-state.y);
           var op = state.radar[0];
           var theta = Math.atan2(op.y - state.y, op.x - state.x);
           state.turn(theta - state.bearing);
-          state.fire(5.0);
+          state.fire(1.0);
         }
 
 
     </script>
 </head>
 <body onload="init();">
-	<canvas id="myCanvas" width="610" height="610"></canvas>
+	<canvas id="myCanvas" width="960" height="480"></canvas>
 </body>
 </html>
