@@ -5,6 +5,7 @@
   <title>Tanktastic!</title>
 
 	<script type="text/javascript" src="lib/easeljs-0.4.2.min.js"></script>
+	<script type="text/javascript" src="lib/seedrandom.js"></script>
 	<script type="text/javascript" src="lib/tanktastic.js"></script>
 
     <script>
@@ -17,7 +18,7 @@
           stage = new Stage("myCanvas");
           var shape = new Shape();
           stage.addChild(shape);
-          game = new Game(1, shape.graphics);
+          game = new Game("test", shape.graphics);
           game.register_tank("t1", t1_step);
           game.register_tank("t2", t2_step);
 					Ticker.addListener(window);
@@ -37,7 +38,7 @@
 					lx.push(op);
 					if(lx.length > 3)
 					{
-						var time = Math.sqrt(Math.pow(state.x - op.x, 2) + Math.pow(state.y - op.y, 2)) / 200;
+						var time = Math.sqrt(Math.pow(state.x - op.x, 2) + Math.pow(state.y - op.y, 2)) / 400;
 						t.x += ((lx[1].x - lx[0].x) / dt) * 0.1 * time;
 						t.y += ((lx[1].y - lx[0].y) / dt) * 0.1 * time;
 						t.x += ((lx[2].x - lx[1].x) / dt) * 0.3 * time;
