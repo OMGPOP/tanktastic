@@ -1,4 +1,5 @@
 root = exports ? this
+root.tanktastic = {}
 
 WIDTH = 960
 HEIGHT = 480
@@ -10,7 +11,7 @@ MAX_FX = 1.5 * 60
 
 limit: (x, min, max) -> Math.min(min, Math.max(x, max))
 
-class root.Game
+class root.tanktastic.Game
 
   dt: 1/60
   dt2: 1/3600
@@ -28,8 +29,8 @@ class root.Game
   is_complete: -> (tank for tank in tanks when tank.life > 0).length < 2
   podium: -> 
     tanks.sort (a,b) -> 
-      return 1 if a > b
-      return -1 if a < b
+      return 1 if a.ticks > b.ticks
+      return -1 if a.ticks < b.ticks
       return 0
 
 
@@ -39,8 +40,8 @@ class root.Game
     while @obstacles.length < num
       @obstacles.push new Obstacle(30 + Math.random() * 80, WIDTH / 2 - 200 + Math.random() * 400, HEIGHT / 2 - 80 + Math.random() * 160)
 
-  register_tank: (name, step, init = null) ->
-    @tanks.push new Tank(name, step, init)
+  register_tank: (tank) ->
+    @tanks.push new Tank(tank.name, tank.step, tank.init)
 
   init: -> tank.init @tanks.length - 1 for tank in @tanks
 
@@ -49,15 +50,14 @@ class root.Game
     if tanks.length < 2
       return
       end_game()
+    now = new Date().getTime()
     if @is_rendered
       @lt = new Date().getTime() unless @lt > 0
-      now = new Date().getTime()
       dt = (now - @lt) / 1000.0
       @a = Math.min @a + dt, 1.0
       tank.hit = false for tank in tanks
     else
       @a = @dt
-
     until @a < @dt
       tank.step @dt, @radar(tank, tanks) for tank in tanks
       @fire tanks
@@ -183,6 +183,7 @@ class root.Game
 class Tank
 
   constructor: (@name, @step_target, @init_target) ->
+    @ticks = 0 # track how many iterations we've been through
     @r = 20
     rc = Math.random() * 0xBB | (Math.random() * 0xBB) << 8 | (Math.random() * 0xBB) << 16
     @color = "#" + rc.toString(16)
@@ -197,12 +198,15 @@ class Tank
   step: (dt, radar) -> 
     @fx = @fy = @dbearing = 0
     @step_target.apply(null, [dt, @to_state(radar)])
+    @ticks++
 
   to_state: (radar) ->
     @fx = @fy = @dbearing = 0.0
     tank = this
     x: @x
     y: @y
+    w: WIDTH
+    h: HEIGHT
     radius: @r
     vx: @vx
     vy: @vy

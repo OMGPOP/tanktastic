@@ -8,8 +8,9 @@
 	<script type="text/javascript" src="lib/seedrandom.js"></script>
 	<script type="text/javascript" src="lib/tanktastic.js"></script>
 
-    <script>
+    <script type="text/javascript">
         var stage;
+        exports = {};
         var game;
 				var lx;
         function init()
@@ -18,10 +19,23 @@
           stage = new Stage("myCanvas");
           var shape = new Shape();
           stage.addChild(shape);
-          game = new Game("test", shape.graphics);
-          game.register_tank("t1", t1_step);
-          game.register_tank("t2", t2_step);
+          game = new tanktastic.Game("test", shape.graphics);
+          debugger;
+          var moron  = require("lib/example-tanks/moron.js");
+          var coward = require("lib/example-tanks/coward.js");
+          game.register_tank(moron);
+          game.register_tank(coward);
 					Ticker.addListener(window);
+        }
+
+        function require(file)
+        {
+          exports = {};
+          var script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.src = file;
+          document.body.appendChild(script);
+          return exports;
         }
 
         function tick()
