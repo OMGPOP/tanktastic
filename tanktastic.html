@@ -57,8 +57,11 @@
 
         function tick()
         {
-          game.step();
-          stage.update();
+          if(!game.is_complete())
+          {
+            game.step();
+            stage.update();
+          }
         }
 
     </script>

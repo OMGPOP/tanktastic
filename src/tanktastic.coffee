@@ -4,13 +4,13 @@ root.tanktastic = {}
 WIDTH = 960
 HEIGHT = 480
 
-DBEARING_MAX = Math.PI / 4
+MAX_DBEARING = Math.PI / 4
 MAX_SENSOR_NOISE = 4
 
 MAX_FX = 1.5 * 60
 MAX_ITERATIONS = 10000
 
-limit: (x, min, max) -> Math.min(min, Math.max(x, max))
+limit = (x, min, max) -> Math.min(min, Math.max(x, max))
 
 class root.tanktastic.Game
 
@@ -72,8 +72,8 @@ class root.tanktastic.Game
   radar: (tank, tanks) -> @sensor t for t in tanks when t isnt tank
 
   sensor: (tank) ->
-    x: tank.x - MAX_SENSOR_NOISE + Math.random() * MAX_SENSOR_NOISE
-    y: tank.y - MAX_SENSOR_NOISE + Math.random() * MAX_SENSOR_NOISE
+    x: tank.x - MAX_SENSOR_NOISE + Math.random() * MAX_SENSOR_NOISE * 2
+    y: tank.y - MAX_SENSOR_NOISE + Math.random() * MAX_SENSOR_NOISE * 2
 
   integrate: (tanks) ->
     for bullet in @bullets
@@ -211,7 +211,7 @@ class Tank
     radius: @r
     vx: @vx
     vy: @vy
-    turn: (bearing) => tank.dbearing = Math.min(Math.max(-DBEARING_MAX, bearing), DBEARING_MAX)
+    turn: (bearing) => tank.dbearing = Math.min(Math.max(-MAX_DBEARING, bearing), MAX_DBEARING)
     exert: (fx, fy) =>
       tank.fx += fx
       tank.fy += fy
