@@ -66,40 +66,6 @@ class Tournament
         @run_match tank_i, tank_j 
         @bar.tick()
 
-  print_results: ->
-    output = "\n  Results:\n\n"
-    results = []
-    for k, v of @players
-      results.push v
-    results.sort (a, b) -> b.wins - a.wins
-    longest = 10
-    for player, i in results
-      output += "    " + (i+1) + ". " + player.name + "\n"
-      longest = player.name.length if player.name.length > longest
-
-    output += "\n"
-    output += @add_line longest, 5
-    output += @add_cell longest, "Tank"
-    output += @add_cell longest, "Wins"
-    output += @add_cell longest, "Losses"
-    output += @add_cell longest, "Ties"
-    output += @add_cell longest, "ELO"
-    output += "|\n"
-    output += @add_line longest, 5
-    for player in results
-      output += @add_cell longest, player.name
-      output += @add_cell longest, player.wins
-      output += @add_cell longest, player.losses
-      output += @add_cell longest, player.ties
-      output += @add_cell longest, Math.round(player.elo)
-      output += "|\n"
-    output += @add_line longest, 5
-    console.log(output)
-
-  add_cell: (len, value) -> "| " + @add_tabular(len, value.toString(), " ")
-  add_line: (len, cols, spacer = "-") -> ("+" + @add_tabular(len + 1, "", spacer) for i in [1..cols]).join("") + "+\n"
-  add_tabular: (len, value, spacer) -> value + (spacer for i in [1..(len-value.length + 1)]).join ""
-
   run_match: (ti, tj) ->
     shash = @hash ti, tj
     tip = @players[ti.name]
