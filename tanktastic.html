@@ -1,12 +1,14 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-  <title>Tanktastic!</title>
 
-	<script type="text/javascript" src="lib/easeljs-0.4.2.min.js"></script>
-	<script type="text/javascript" src="lib/seedrandom.js"></script>
-	<script type="text/javascript" src="lib/tanktastic.js"></script>
+  <head>
+
+    <title>Tanktastic!</title>
+
+    <script type="text/javascript" src="lib/easeljs-0.4.2.min.js"></script>
+    <script type="text/javascript" src="lib/seedrandom.js"></script>
+    <script type="text/javascript" src="lib/tanktastic.js"></script>
 
     <script type="text/javascript">
         var stage;
@@ -28,7 +30,7 @@
           var shape = stage.addChild(new Shape());
           game = new tanktastic.Game(window.location.search, shape.graphics);
           for(var i in required) game.register_tank(required[i]);
-					Ticker.addListener(window);
+          Ticker.addListener(window);
         }
 
         function appendTank(file)
@@ -60,8 +62,11 @@
         }
 
     </script>
-</head>
-<body onload="resolve();">
-	<canvas id="arena" width="960" height="480"></canvas>
-</body>
+
+  </head>
+
+  <body onload="resolve();">
+    <canvas id="arena" width="960" height="480"></canvas>
+  </body>
+
 </html>
