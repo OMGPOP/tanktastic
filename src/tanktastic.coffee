@@ -17,7 +17,7 @@ class root.tanktastic.Game
   dt2: 1/3600
   
   constructor: (seed, graphics=null) ->
-    Math.seedrandom # seed
+    Math.seedrandom seed
     @tanks = []
     @bullets = []
     @build_obstacles()

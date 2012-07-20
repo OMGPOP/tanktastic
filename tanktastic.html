@@ -10,32 +10,56 @@
 
     <script type="text/javascript">
         var stage;
-        exports = {};
+        var required = [];
+        var tanks = [];
+        exports = null;
         var game;
 				var lx;
         function init()
         {
-					lx = [];
+          tanks = [
+            "lib/example-tanks/moron.js",
+            "lib/example-tanks/coward.js",
+            "lib/example-tanks/coward.js",
+            "lib/example-tanks/coward.js",
+            "lib/example-tanks/coward.js",
+            "lib/example-tanks/coward.js",
+            "lib/example-tanks/coward.js",
+            "lib/example-tanks/coward.js",
+            "lib/example-tanks/coward.js" 
+              ];
+          resolve();
+        }
+
+        function startGame()
+        {
           stage = new Stage("myCanvas");
-          var shape = new Shape();
-          stage.addChild(shape);
-          game = new tanktastic.Game("test", shape.graphics);
-          debugger;
-          var moron  = require("lib/example-tanks/moron.js");
-          var coward = require("lib/example-tanks/coward.js");
-          game.register_tank(moron);
-          game.register_tank(coward);
+          var shape = stage.addChild(new Shape());
+          game = new tanktastic.Game(window.location.search, shape.graphics);
+          for(var i in required) game.register_tank(required[i]);
 					Ticker.addListener(window);
         }
 
-        function require(file)
+        function appendTank(file)
         {
           exports = {};
+          required.push(exports);
           var script = document.createElement('script');
           script.type = 'text/javascript';
-          script.src = file;
-          document.body.appendChild(script);
-          return exports;
+          script.src = file + "?r=" + Math.random();
+          document.getElementsByTagName("HEAD")[0].appendChild(script);
+          setTimeout(resolve, 10);
+        }
+
+        function resolve()
+        {
+          if(exports && !exports.name)
+          {
+            setTimeout(resolve, 5);
+            return;
+          }
+          if(tanks.length) appendTank(tanks.pop());
+          else startGame();
         }
 
         function tick()
