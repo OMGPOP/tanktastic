@@ -8,6 +8,7 @@ DBEARING_MAX = Math.PI / 4
 MAX_SENSOR_NOISE = 4
 
 MAX_FX = 1.5 * 60
+MAX_ITERATIONS = 10000
 
 limit: (x, min, max) -> Math.min(min, Math.max(x, max))
 
@@ -23,16 +24,18 @@ class root.tanktastic.Game
     @build_obstacles()
     @lt = 0
     @a = 0
-    @renderer = new Renderer(graphics) if graphics
+    @iterations = 0
+    @renderer = if graphics then new Renderer(graphics) else null
 
-  is_rendered: -> @renderer not null
-  is_complete: -> (tank for tank in tanks when tank.life > 0).length < 2
+  is_rendered: -> @renderer isnt null
+  is_complete: -> @iterations >= MAX_ITERATIONS or (tank for tank in @tanks when tank.life > 0).length < 2
   podium: -> 
-    tanks.sort (a,b) -> 
+    @tanks.sort (a,b) -> 
       return 1 if a.ticks > b.ticks
       return -1 if a.ticks < b.ticks
+      return 1 if a.life > b.life
+      return -1 if a.life < b.life
       return 0
-
 
   build_obstacles: ->
     @obstacles = []
@@ -47,11 +50,8 @@ class root.tanktastic.Game
 
   step: ->
     tanks = @tanks.filter (tank) -> tank.life > 0
-    if tanks.length < 2
-      return
-      end_game()
     now = new Date().getTime()
-    if @is_rendered
+    if @is_rendered()
       @lt = new Date().getTime() unless @lt > 0
       dt = (now - @lt) / 1000.0
       @a = Math.min @a + dt, 1.0
@@ -66,7 +66,8 @@ class root.tanktastic.Game
       @bullets = @bullets.filter (bullet) -> not bullet.dead
       @a -= @dt
     @lt = now
-    @renderer.render(tanks, @bullets, @obstacles) if @is_rendered
+    @iterations++
+    @renderer.render(tanks, @bullets, @obstacles) if @is_rendered()
 
   radar: (tank, tanks) -> @sensor t for t in tanks when t isnt tank
 
