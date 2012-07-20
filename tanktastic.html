@@ -11,13 +11,7 @@
     <script type="text/javascript">
         var stage;
         var required = [];
-        var tanks = [];
-        exports = null;
-        var game;
-
-        function init()
-        {
-          tanks = [
+        var tanks = [
             "lib/example-tanks/moron.js",
             "lib/example-tanks/aggressivo.js",
             "lib/example-tanks/coward.js",
@@ -25,8 +19,8 @@
             "lib/example-tanks/coward.js",
             "lib/example-tanks/coward.js",
               ];
-          resolve();
-        }
+        exports = null;
+        var game;
 
         function startGame()
         {
@@ -67,7 +61,7 @@
 
     </script>
 </head>
-<body onload="init();">
+<body onload="resolve();">
 	<canvas id="arena" width="960" height="480"></canvas>
 </body>
 </html>
