@@ -1,4 +1,4 @@
-exports.name = "Moron"
+exports.name = "Me!"
 exports.step = function(dt, state) 
 {
 	// just move around and shoot randomly. like a moron.

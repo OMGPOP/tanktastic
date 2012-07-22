@@ -9,13 +9,28 @@
     <script type="text/javascript" src="lib/easeljs-0.4.2.min.js"></script>
     <script type="text/javascript" src="lib/seedrandom.js"></script>
     <script type="text/javascript" src="lib/tanktastic.js"></script>
-
+		<style type="text/css">
+			.outer
+			{
+				color: #666666;
+				font-family: "Arial";
+				font-size: 20px;
+				font-weight: bold;
+				margin: 10px;
+			}
+			.stat
+			{
+				font-size: 14px;
+			}
+		</style>
     <script type="text/javascript">
         var stage;
         var required = [];
         var tanks = [
             "lib/example-tanks/aggressivo.js",
-            "lib/example-tanks/coward.js"
+            // "my-tank.js",
+						"lib/example-tanks/coward.js",
+						"lib/example-tanks/moron.js"
               ];
         exports = null;
         var game;
@@ -26,8 +41,17 @@
           var shape = stage.addChild(new Shape());
           game = new tanktastic.Game(window.location.search, shape.graphics);
           for(var i in required) game.register_tank(required[i]);
+					for(i in game.tanks) addHUD(game.tanks[i], i);
           Ticker.addListener(window);
         }
+
+				function addHUD(tank, index)
+				{
+					var div = "<div id='" + tank.name + index + "-outer' class='outer'>" + tank.name + "<br>";
+					div += "<div id='" + tank.name + index + "-life' class='stat'>" + tank.life + "</div>";
+					div += "<div id='" + tank.name + index + "-score' class='stat'>" + tank.score + "</div>";
+					document.getElementById("hud").innerHTML += div;
+				}
 
         function appendTank(file)
         {
@@ -57,7 +81,30 @@
           {
             game.step();
             stage.update();
+						var tanks = game.tanks;
+						for(var i in tanks)
+						{
+							var tank = tanks[i];
+							var div = document.getElementById(tank.name + i + "-outer");
+							div.style.color = tank.life > 0 ? tank.color : "#CCC";
+							div = document.getElementById(tank.name + i + "-life");
+							div.innerHTML = "life: " + Math.max(tank.life, 0).toFixed(1);
+							div = document.getElementById(tank.name + i + "-score");
+							div.innerHTML = "score: " + tank.score.toFixed(1);
+						}
           }
+					else
+					{
+						var podium = game.podium();
+						var winner = podium[podium.length - 1];
+						if(winner.life > 0)
+						{
+							var i = game.tanks.indexOf(winner);
+							var outerDiv = document.getElementById(winner.name + i + "-outer");
+							outerDiv.style["margin-left"] = "30px";
+							Ticker.removeListener(window);
+						}
+					}
         }
 
     </script>
@@ -65,7 +112,15 @@
   </head>
 
   <body onload="resolve();">
-    <canvas id="arena" width="960" height="480"></canvas>
+		<table>
+			<tr>
+				<td width="960">
+					<canvas id="arena" width="960" height="480"></canvas>
+				</td>
+				<td id="hud" width="300" valign="top">
+				</td>
+			</tr>
+		</table>
   </body>
 
 </html>
