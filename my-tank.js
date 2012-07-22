@@ -1,8 +1,10 @@
-exports.name = "Me!"
+exports.name = "Me!";
 exports.step = function(dt, state) 
 {
-	// just move around and shoot randomly. like a moron.
-  state.exert((-20 + Math.random() * 40)/dt, (-20 + Math.random() * 40)/dt);
-  state.set_bearing(state.bearing - 0.05 + Math.random() * 0.1);
-  state.fire(0.5);
+  var opponent = state.closest();
+  var dx = opponent.x - state.x;
+  var dy = opponent.y - state.y;
+  state.exert(-dx, -dy);
+	state.aim_at(opponent.x, opponent.y);
+  state.fire(3.0);
 }
