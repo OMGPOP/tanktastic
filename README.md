@@ -41,7 +41,7 @@ exports.step = function(dt, state)
 Note that ```step``` takes 2 arguments, ```dt``` and ```state```. ```dt``` is the _delta time_, or the amount of time (in seconds) that has elapsed since the last game loop. ```state``` is what represents the state of the game; a collection of all the information you have about the game at the current time. It also provides methods for controlling your tank. 
 
 ### ```state``` API
-First, let's look at the properties on ```state```:
+```state``` has the following properties:
 
 1. ```x```: position of your tank along the x-axis (pixels)
 2. ```y```: position of your tank along the y-axis (pixels)
@@ -60,7 +60,7 @@ First, let's look at the properties on ```state```:
 
 The only property that might not be self-explanatory is ```gun_heat```. Your gun must be completely cool to fire. When you shoot, your gun heats up according to how powerful the shot is.
 
-Next, let's look at the methods provided to control your tank:
+The methods defined on ```state``` to control your tank are:
 
 1. ```set_bearing(bearing)```: this sets the orientation of your turret immediately (radians)
 2. ```fire(power)```: this makes a request to fire at the given power (temperature per second before cooldown; ```[0.1, 3.0]```)
