@@ -63,7 +63,7 @@ The only property that might not be self-explanatory is ```gun_heat```. Your gun
 The methods defined on ```state``` to control your tank are:
 
 1. ```set_bearing(bearing)```: this sets the orientation of your turret immediately (radians)
-2. ```fire(power)```: this makes a request to fire at the given power (temperature per second before cooldown; ```[0.1, 3.0]```)
+2. ```fire(power)```: this makes a request to fire at the given power (seconds to cooldown; ```[0.1, 3.0]```)
 3. ```exert(fx, fy)```: exert a force in the given x and y directions
 4. ```aim_at(x, y)```: convenience method to turn your turret to aim at the given coordinate
 5. ```closest()```: convenience method to get the closest scanned tank from ```radar```
