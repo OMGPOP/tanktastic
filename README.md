@@ -68,8 +68,9 @@ The methods defined on ```state``` to control your tank are:
 5. ```closest()```: convenience method to get the closest scanned tank from ```radar```
 
 ### Considerations
-A couple things necessitate a bit more detail. First, your radar isn't perfect; there's some noise in the signal, so the ```(x,y)``` readings of your opponent tanks aren't precise. 
+A couple things necessitate a bit more detail. 
 
-Second, the amount of damage a bullet will do is a non-linear function of the power. Here's the function and its graph over the valid range of firepowers:
+1. Your radar isn't perfect; there's some noise in the signal, so the ```(x,y)``` readings of your opponent tanks aren't precise. The error in the reading has a normal distribution with _&mu;_ = 0 and _&sigma;_ = _&gamma;_ log<sub>10</sub> _d<sub>i</sub>_, where _d<sub>i</sub>_ is the distance to the _i_ th scanned tank and _&gamma;_ is a constant. This means that the error is a function of the distance; closer scans are more accurate.
+2. The amount of damage a bullet will do is a non-linear function of the power. Here's the function and its graph over the valid range of firepowers:
 
 ![Firepower function](https://s3.amazonaws.com/challenges.engineering/images/tanktastic-power.png "Firepower function")
