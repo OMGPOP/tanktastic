@@ -5,7 +5,6 @@ WIDTH = 960
 HEIGHT = 480
 
 MAX_DBEARING = Math.PI
-MAX_SENSOR_NOISE = 2
 
 MAX_ITERATIONS = 10000
 
@@ -55,7 +54,6 @@ class root.tanktastic.Game
     num = 1 + Math.floor(Math.random() * 3)
     while @obstacles.length < num
       @obstacles.push new Obstacle(rand(30, 80), rand(WIDTH / 2 - 200, 400), rand(HEIGHT / 2 - 80, 160))
-    @obstacles = []
 
   register_tank: (tank) -> @tanks.push new Tank(tank.name, tank.step, tank.init)
   obstacle_state: -> {x:ob.x, y:ob.y, r:ob.r} for ob in @obstacles
