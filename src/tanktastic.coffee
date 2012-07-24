@@ -18,6 +18,9 @@ MAX_SPEED2 = MAX_SPEED * MAX_SPEED
 DRAG = 0.05
 MUZZLE_SPEED = 400
 
+LOG_10 = Math.log(10)
+GAMMA = 1/3
+
 limit = (x, min, max) -> Math.max(min, Math.min(x, max))
 rand = (min, range) -> min + Math.random() * range
 
@@ -28,6 +31,7 @@ class root.tanktastic.Game
   
   constructor: (seed, graphics=null) ->
     Math.seedrandom seed
+    @grng = new GaussRNG()
     @tanks = []
     @bullets = []
     @build_obstacles()
@@ -51,20 +55,23 @@ class root.tanktastic.Game
     num = 1 + Math.floor(Math.random() * 3)
     while @obstacles.length < num
       @obstacles.push new Obstacle(rand(30, 80), rand(WIDTH / 2 - 200, 400), rand(HEIGHT / 2 - 80, 160))
+    @obstacles = []
 
   register_tank: (tank) -> @tanks.push new Tank(tank.name, tank.step, tank.init)
   obstacle_state: -> {x:ob.x, y:ob.y, r:ob.r} for ob in @obstacles
 
-  init: -> tank.init @tanks.length - 1 for tank in @tanks
+  init: -> 
+    @resolve_tank_obstacles @tanks
+    tank.init @tanks.length - 1 for tank in @tanks
 
-  step: ->
+  step: (discrete=false) ->
     tanks = @tanks.filter (tank) -> tank.life > 0
     now = new Date().getTime()
-    if @is_rendered()
+    tank.hit = false for tank in tanks
+    if (not discrete) and @is_rendered()
       @lt = now unless @lt > 0
       dt = (now - @lt) / 1000.0
       @a = Math.min @a + dt, 1.0
-      tank.hit = false for tank in tanks
     else
       @a = @dt
     until @a < @dt
@@ -74,15 +81,21 @@ class root.tanktastic.Game
       @resolve_collisions tanks
       @bullets = @bullets.filter (bullet) -> not bullet.dead
       @a -= @dt
-    @lt = now
+    @lt = if discrete then 0 else now
     @iterations++
     @renderer.render(tanks, @bullets, @obstacles) if @is_rendered()
 
-  radar: (tank, tanks) -> @sensor t for t in tanks when t isnt tank
+  radar: (tank, tanks) -> @sensor tank, t for t in tanks when t isnt tank
 
-  sensor: (tank) ->
-    x: tank.x - MAX_SENSOR_NOISE + Math.random() * MAX_SENSOR_NOISE * 2
-    y: tank.y - MAX_SENSOR_NOISE + Math.random() * MAX_SENSOR_NOISE * 2
+  sensor: (scanner, tank) ->
+    dx = tank.x - scanner.x
+    dy = tank.y - scanner.y
+    dist = Math.max(Math.sqrt(dx * dx + dy * dy) - (tank.r + scanner.r), 1)
+    sigma = GAMMA * Math.log(dist) / LOG_10
+    x: tank.x + @grng.random(0, sigma)
+    y: tank.y + @grng.random(0, sigma)
+
+  render: -> @renderer.render(@tanks, @bullets, @obstacles)
 
   integrate: (tanks) ->
     for bullet in @bullets
@@ -110,7 +123,7 @@ class root.tanktastic.Game
         bullet = new Bullet(tank, tank.fire_command)
         tank.gun_heat += tank.fire_command
         @bullets.push bullet
-      else tank.gun_heat -= @dt
+      else tank.gun_heat = Math.max tank.gun_heat - @dt, 0
 
   resolve_collisions: (tanks) ->
     for i in [0..tanks.length-2]
@@ -137,6 +150,32 @@ class root.tanktastic.Game
           tj.vx += dx * impulse
           tj.vy += dy * impulse
 
+    @resolve_tank_obstacles tanks
+
+    for bullet in @bullets
+      bullet.dead = true if bullet.x > WIDTH || bullet.x < 0 || bullet.y < 0 || bullet.y > HEIGHT || @does_collide(bullet)
+      continue unless not bullet.dead
+      for tank in tanks
+        unless bullet.tank is tank
+          dx = bullet.x - tank.x
+          dy = bullet.y - tank.y
+          if dx * dx + dy * dy <= (tank.r + bullet.r) * (tank.r + bullet.r)
+            bullet.dead = true
+            tank.life -= bullet.power
+            tank.hit = true
+            bullet.tank.score += bullet.power
+            break
+
+  does_collide: (bullet) -> 
+    for obstacle in @obstacles
+      dx = bullet.x - obstacle.x
+      dy = bullet.y - obstacle.y
+      return true if dx * dx + dy * dy <= Math.pow(bullet.r + obstacle.r, 2)
+    return false
+
+  end_game: -> alert "End of game."
+
+  resolve_tank_obstacles: (tanks) ->
     for tank in tanks
       dx = 0
       dy = 0
@@ -168,28 +207,6 @@ class root.tanktastic.Game
             tank.vx -= dx * impulse
             tank.vy -= dy * impulse
 
-    for bullet in @bullets
-      bullet.dead = true if bullet.x > WIDTH || bullet.x < 0 || bullet.y < 0 || bullet.y > HEIGHT || @does_collide(bullet)
-      continue unless not bullet.dead
-      for tank in tanks
-        unless bullet.tank is tank
-          dx = bullet.x - tank.x
-          dy = bullet.y - tank.y
-          if dx * dx + dy * dy <= (tank.r + bullet.r) * (tank.r + bullet.r)
-            bullet.dead = true
-            tank.life -= bullet.power
-            tank.hit = true
-            bullet.tank.score += bullet.power
-            break
-
-  does_collide: (bullet) -> 
-    for obstacle in @obstacles
-      dx = bullet.x - obstacle.x
-      dy = bullet.y - obstacle.y
-      return true if dx * dx + dy * dy <= Math.pow(bullet.r + obstacle.r, 2)
-    return false
-
-  end_game: -> alert "End of game."
 
 
 class Tank
@@ -199,6 +216,7 @@ class Tank
     @r = 20
     rc = Math.random() * 0xBB | (Math.random() * 0xBB) << 8 | (Math.random() * 0xBB) << 16
     @color = "#" + rc.toString(16)
+    @color += "0" until @color.length > 6
     @x = Math.random() * (WIDTH - 2 * @r)
     @y = Math.random() * (HEIGHT - 2 * @r)
     @vx = @vy = @gun_heat = @score = 0
@@ -237,7 +255,6 @@ class Tank
     obstacles: obstacles
     gun_heat: @gun_heat
     life: @life
-    score: @score
     muzzle_speed: MUZZLE_SPEED
 
 class Bullet
@@ -245,7 +262,7 @@ class Bullet
     i = Math.cos @tank.bearing
     j = Math.sin @tank.bearing
     @r = 2 + @power
-    @power = Math.pow(1 + @power / 2, 2) * Math.sqrt(@power) # * @power + Math.sqrt(1 + @power * @power)
+    @power = Math.exp(@power) - 1/3#Math.pow(2,@power + 1) / 2 #Math.pow(1 + @power / 2, 2) * Math.sqrt(@power) 
     @x = @tank.x + i * (tank.r + @r - 6)
     @y = @tank.y + j * (tank.r + @r - 6)
     @vx = i * MUZZLE_SPEED
@@ -308,4 +325,23 @@ class Renderer
     life = Math.max tank.life, 0
     @graphics.rect(tank.x + 7, tank.y - 20, 18 * life / 100, 4)
     @graphics.endFill()
+
+class GaussRNG
+  constructor: ->
+    @v1 = @v2 = @s = @phase = 0
+
+  random: (mu, sigma) ->
+    if @phase is 0
+      loop
+        @v1 = 2 * Math.random() - 1
+        @v2 = 2 * Math.random() - 1
+        @s = @v1 * @v1 + @v2 * @v2
+        break unless @s >= 1 or @s is 0
+      x = @v1 * Math.sqrt(-2 * Math.log(@s) / @s)
+    else
+      x = @v2 * Math.sqrt(-2 * Math.log(@s) / @s)
+    @phase = 1 - @phase
+    return mu + sigma * x
+
+
 

@@ -9,29 +9,17 @@
     <script type="text/javascript" src="lib/easeljs-0.4.2.min.js"></script>
     <script type="text/javascript" src="lib/seedrandom.js"></script>
     <script type="text/javascript" src="lib/tanktastic.js"></script>
-    <style type="text/css">
-      .outer
-      {
-        color: #666666;
-        font-family: "Arial";
-        font-size: 20px;
-        font-weight: bold;
-        margin: 10px;
-      }
-      .stat
-      {
-        font-size: 14px;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="assets/css/tanktastic.css"></style>
     <script type="text/javascript">
         var stage;
         var required = [];
         var tanks = [
             "lib/example-tanks/aggressivo.js",
-            // "my-tank.js",
-            "lib/example-tanks/coward.js",
+            // "my-tank.js"
+            "lib/example-tanks/coward.js"
             "lib/example-tanks/moron.js"
               ];
+        var ticking = false;
         exports = null;
         var game;
 
@@ -42,7 +30,10 @@
           game = new tanktastic.Game(window.location.search, shape.graphics);
           for(var i in required) game.register_tank(required[i]);
           for(i in game.tanks) addHUD(game.tanks[i], i);
-          Ticker.addListener(window);
+          game.init();
+          game.render();
+          stage.update();
+          updateHUD();
         }
 
         function addHUD(tank, index)
@@ -79,19 +70,9 @@
         {
           if(!game.is_complete())
           {
-            game.step();
+            game.step(!ticking);
             stage.update();
-            var tanks = game.tanks;
-            for(var i in tanks)
-            {
-              var tank = tanks[i];
-              var div = document.getElementById(tank.name + i + "-outer");
-              div.style.color = tank.life > 0 ? tank.color : "#CCC";
-              div = document.getElementById(tank.name + i + "-life");
-              div.innerHTML = "life: " + Math.max(tank.life, 0).toFixed(1);
-              div = document.getElementById(tank.name + i + "-score");
-              div.innerHTML = "score: " + tank.score.toFixed(1);
-            }
+            updateHUD();
           }
           else
           {
@@ -102,9 +83,61 @@
               var i = game.tanks.indexOf(winner);
               var outerDiv = document.getElementById(winner.name + i + "-outer");
               outerDiv.style["margin-left"] = "30px";
-              Ticker.removeListener(window);
             }
+            stopGame();
+            var div = document.getElementById("controls");
+            div.parentNode.removeChild(div);
           }
+        }
+
+        function updateHUD()
+        {
+          var tanks = game.tanks;
+          for(var i in tanks)
+          {
+            var tank = tanks[i];
+            var div = document.getElementById(tank.name + i + "-outer");
+            div.style.color = tank.life > 0 ? tank.color : "#CCC";
+            div = document.getElementById(tank.name + i + "-life");
+            div.innerHTML = "life: " + Math.max(tank.life, 0).toFixed(1);
+            div = document.getElementById(tank.name + i + "-score");
+            div.innerHTML = "score: " + tank.score.toFixed(1);
+          }
+        }
+
+        function onStep(event)
+        {
+          event.preventDefault();
+          if(game && !game.is_complete())
+          {
+            stopGame();
+            tick();
+          }
+        }
+
+        function onPausePlay(event)
+        {
+          event.preventDefault();
+          var btn = document.getElementById("pause-play");
+          if(btn.className == "pause") stopGame();
+          else runGame();
+        }
+
+        function runGame(event)
+        {
+          var btn = document.getElementById("pause-play");
+          btn.className = "pause";
+          game.step(true); // take one step to catch time up
+          ticking = true;
+          Ticker.addListener(window);
+        }
+
+        function stopGame(event)
+        {
+          var btn = document.getElementById("pause-play");
+          btn.className = "play";
+          ticking = false;
+          Ticker.removeListener(window);
         }
 
     </script>
@@ -116,6 +149,10 @@
       <tr>
         <td width="960">
           <canvas id="arena" width="960" height="480"></canvas>
+          <div id="controls">
+            <a id="pause-play" class="play" href="#" onclick="onPausePlay(event)"></a>
+            <a class="step" href="#" onclick="onStep(event)"></a>
+          </div>
         </td>
         <td id="hud" width="300" valign="top">
         </td>

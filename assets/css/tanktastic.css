@@ -1,0 +1,73 @@
+.outer
+{
+  color: #666666;
+  font-family: "Arial";
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px;
+}
+.stat
+{
+  font-size: 14px;
+}
+.pause
+{
+  display: block;
+  float: left;
+  width: 68px;
+  height: 68px;
+  margin-left: 5px;
+  margin-top: 5px;
+  background: transparent url('../images/controls.png') no-repeat;
+  background-position: -136px 0px;
+  text-indent: -5000px;
+}
+.pause:hover
+{
+  background-position: -68px 0px;
+}
+.pause:active
+{
+  background-position: 0px 0px;
+}
+
+.play
+{
+  display: block;
+  float: left;
+  width: 68px;
+  height: 68px;
+  margin-left: 5px;
+  margin-top: 5px;
+  background: transparent url('../images/controls.png') no-repeat;
+  background-position: -340px 0px;
+  text-indent: -5000px;
+}
+.play:hover
+{
+  background-position: -272px 0px;
+}
+.play:active
+{
+  background-position: -204px 0px;
+}
+
+.step
+{
+  display: block;
+  float: left;
+  width: 68px;
+  height: 68px;
+  margin-top: 5px;
+  background: transparent url('../images/controls.png') no-repeat;
+  background-position: -544px 0px;
+  text-indent: -5000px;
+}
+.step:hover
+{
+  background-position: -476px 0px;
+}
+.step:active
+{
+  background-position: -408px 0px;
+}

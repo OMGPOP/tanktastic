@@ -8,3 +8,4 @@ exports.step = function(dt, state)
   state.aim_at(opponent.x, opponent.y);
   state.fire(3.0);
 }
+
