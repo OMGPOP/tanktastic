@@ -53,10 +53,9 @@ Note that ```step``` takes 2 arguments, ```dt``` and ```state```. ```dt``` is th
 8. ```bearing```: your tank's turret orientation (in radians)
 9. ```gun_heat```: your gun's current temperature
 10. ```life```: how much life you have left (```[0, 100]```)
-11. ```score```: your current score
-12. ```muzzle_speed```: the speed at which bullets are shot (constant, pixels per second)
-13. ```radar```: a list of ```(x,y)``` pairs representing tanks scanned by your radar. 
-14. ```obstacles```: a list of ```(x,y,r)``` objects, where ```x, y``` is the position of the obstacle and ```r``` is its radius
+11. ```muzzle_speed```: the speed at which bullets are shot (constant, pixels per second)
+12. ```radar```: a list of ```(x,y)``` pairs representing tanks scanned by your radar. 
+13. ```obstacles```: a list of ```(x,y,r)``` objects, where ```x, y``` is the position of the obstacle and ```r``` is its radius
 
 The only property that might not be self-explanatory is ```gun_heat```. Your gun must be completely cool to fire. When you shoot, your gun heats up according to how powerful the shot is.
 
@@ -64,11 +63,14 @@ The methods defined on ```state``` to control your tank are:
 
 1. ```set_bearing(bearing)```: this sets the orientation of your turret immediately (radians)
 2. ```fire(power)```: this makes a request to fire at the given power (seconds to cooldown; ```[0.1, 3.0]```)
-3. ```exert(fx, fy)```: exert a force in the given x and y directions
+3. ```exert(fx, fy)```: exert a force on your tank in the given x and y directions
 4. ```aim_at(x, y)```: convenience method to turn your turret to aim at the given coordinate
 5. ```closest()```: convenience method to get the closest scanned tank from ```radar```
 
 ### Considerations
-A couple things necessitate a bit more detail. First, your radar isn't perfect; there's some noise in the signal, so the ```(x,y)``` readings of your opponent tanks aren't precise. Second, the amount of damage a bullet will do is a non-linear function of the power. Here's the function and its graph over the valid range of firepowers:
+A couple things necessitate a bit more detail. 
+
+1. Your radar isn't perfect; there's some noise in the signal, so the ```(x,y)``` readings of your opponent tanks aren't precise. The error in the reading has a normal distribution with _&mu;_ = 0 and _&sigma;_ = _&gamma;_ log<sub>10</sub> _d<sub>i</sub>_, where _d<sub>i</sub>_ is the distance to the _i_ th scanned tank and _&gamma;_ is a constant. This means that the error is a function of the distance; closer scans are more accurate.
+2. The amount of damage a bullet will do is a non-linear function of the power. Here's the function and its graph over the valid range of firepowers:
 
 ![Firepower function](https://s3.amazonaws.com/challenges.engineering/images/tanktastic-power.png "Firepower function")
