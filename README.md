@@ -25,7 +25,7 @@ var tanks = [
 			];
 ```
 ### Defining a Tank
-Defining a tank is very simple, you just need to provide a name for your tank and a method called step, which gets called each game loop, attaching them to the ```exports``` object:
+Defining a tank is very simple, you just need to provide a name for your tank and a method called step, which gets called each game loop. These get attached to the global ```exports``` object:
 ```javascript
 exports.name = "Me!";
 exports.step = function(dt, state, controller) 
@@ -38,7 +38,7 @@ exports.step = function(dt, state, controller)
   controller.fire(3.0);
 }
 ```
-Note that ```step``` takes 3 arguments, ```dt```, ```state``` and ```controller```. ```dt``` is the _delta time_, or the amount of time (in seconds) that has elapsed since the last game loop. ```state``` is what represents the state of the game; a collection of all the information you have about the game at the current time. ```controller``` provides methods for controlling your tank. 
+Note that ```step``` takes 3 arguments: ```dt```, ```state``` and ```controller```. ```dt``` is the _delta time_, or the amount of time (in seconds) that has elapsed since the last game loop. ```state``` is what represents the state of the game; a collection of all the information you have about the game at the current time. ```controller``` provides methods for controlling your tank. 
 
 ### API
 ```state``` has the following properties:
