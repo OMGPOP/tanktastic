@@ -38,7 +38,7 @@ exports.step = function(dt, state, controller)
   controller.fire(3.0);
 }
 ```
-Note that ```step``` takes 3 arguments: ```dt```, ```state``` and ```controller```. ```dt``` is the _delta time_, or the amount of time (in seconds) that has elapsed since the last game loop. ```state``` is what represents the state of the game; a collection of all the information you have about the game at the current time. ```controller``` provides methods for controlling your tank. Also note that although it's been omitted in the snippet above, it's important to wrap your AIs in a closure to prevent any naming conflicts.
+Note that ```step``` takes 3 arguments: ```dt```, ```state``` and ```controller```. ```dt``` is the _delta time_, or the amount of time (in seconds) that has elapsed since the last game loop. ```state``` is what represents the state of the game; a collection of all the information you have about the game at the current time. ```controller``` provides methods for controlling your tank. Also note that although it's been omitted in the snippet above, it's important to wrap your AI in a closure to prevent any naming conflicts.
 
 ### API
 ```state``` has the following properties:
