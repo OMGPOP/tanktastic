@@ -47,7 +47,7 @@ Note that ```step``` takes 3 arguments: ```dt```, ```state``` and ```controller`
 2. ```y```: position of your tank along the y-axis (pixels)
 3. ```w```: the total width of the rectangular arena (constant)
 4. ```h```: the total height of the arena (constant)
-5. ```radius```: your tank's radius
+5. ```radius```: your tank's radius (constant)
 6. ```vx```: your tank's speed along the x-axis (pixels per second)
 7. ```vy```: your tank's speed along the y-axis (pixels per second)
 8. ```bearing```: your tank's turret orientation (in radians)
@@ -59,7 +59,7 @@ Note that ```step``` takes 3 arguments: ```dt```, ```state``` and ```controller`
 
 The only property that might not be self-explanatory is ```gun_heat```. Your gun must be completely cool to fire. When you shoot, your gun heats up according to how powerful the shot is.
 
-```state``` also defines a convenience method, ```closest```, which gets the closest scanned tank in ```state.radar```.
+```state``` also defines a convenience method, ```closest```, which gets the closest scanned tank in ```state.radar```. 
 
 The methods defined on ```controller``` to control your tank are:
 
@@ -68,10 +68,13 @@ The methods defined on ```controller``` to control your tank are:
 3. ```exert(fx, fy)```: exert a force on your tank in the given x and y directions
 4. ```aim_at(x, y)```: convenience method to turn your turret to aim at the given coordinate
 
+Finally, you're able to define an ```init``` method that takes ```state``` as its only argument if you'd like to initialize anything before the game starts. It is completely optional.
+
 ### Considerations
 A couple things necessitate a bit more detail. 
 
 1. Your radar isn't perfect; there's some noise in the signal, so the ```(x,y)``` readings of your opponent tanks aren't precise. The error in the reading has a normal distribution with _&mu;_ = 0 and _&sigma;_ = _&gamma;_ log<sub>10</sub> _d<sub>i</sub>_, where _d<sub>i</sub>_ is the distance to the _i_ th scanned tank and _&gamma;_ is a constant. This means that the error is a function of the distance; closer scans are more accurate.
+
 2. The amount of damage a bullet will do is a non-linear function of the power. Here's the function and its graph over the valid range of firepowers:
 
-![Firepower function](https://s3.amazonaws.com/challenges.engineering/images/tanktastic-power.png "Firepower function")
+![Firepower](https://s3.amazonaws.com/challenges.engineering/images/tanktastic-power.png "Firepower function")
