@@ -107,7 +107,6 @@ class root.tanktastic.Game
     dy = tank.y - scanner.y
     dist = Math.max(Math.sqrt(dx * dx + dy * dy) - (tank.r + scanner.r), 1)
     sigma = GAMMA * Math.log(dist) / LOG_10
-    console.log @grng.random(0,sigma)
     x: tank.x + @grng.random(0, sigma)
     y: tank.y + @grng.random(0, sigma)
 
