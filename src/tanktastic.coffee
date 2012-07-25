@@ -225,35 +225,39 @@ class Tank
 
   step: (dt, radar, obstacles) -> 
     @fx = @fy = @dbearing = 0
-    @step_target.apply(null, [dt, @to_state(radar, obstacles)])
+    [state, controller] = @to_state radar, obstacles
+    @step_target.apply(null, [dt, state, controller])
     @ticks++
 
   to_state: (radar, obstacles) ->
     @fx = @fy = @dbearing = 0.0
     tank = this
-    x: @x
-    y: @y
-    w: WIDTH
-    h: HEIGHT
-    radius: @r
-    vx: @vx
-    vy: @vy
-    set_bearing: (bearing) => tank.bearing = bearing
-    exert: (fx, fy) =>
-      tank.fx += fx
-      tank.fy += fy
-    fire: (power) => tank.fire_command = limit power, MIN_FIRE_POWER, MAX_FIRE_POWER
-    aim_at: (x, y) => tank.bearing = Math.atan2(y - @y, x - @x)
-    closest: -> 
-      return radar[0] if radar.length is 1
-      dists = radar.map ((op) -> {dist:Math.pow(op.x - tank.x, 2) + Math.pow(op.y - tank.y, 2), op:op})
-      dists.sort((a, b) -> a.dist - b.dist)[0].op
-    bearing: @bearing
-    radar: radar
-    obstacles: obstacles
-    gun_heat: @gun_heat
-    life: @life
-    muzzle_speed: MUZZLE_SPEED
+    controller = 
+      set_bearing: (bearing) => tank.bearing = bearing
+      exert: (fx, fy) =>
+        tank.fx += fx
+        tank.fy += fy
+      fire: (power) => tank.fire_command = limit power, MIN_FIRE_POWER, MAX_FIRE_POWER
+      aim_at: (x, y) => tank.bearing = Math.atan2(y - @y, x - @x)
+    state = 
+      x: @x
+      y: @y
+      w: WIDTH
+      h: HEIGHT
+      radius: @r
+      vx: @vx
+      vy: @vy
+      bearing: @bearing
+      radar: radar
+      obstacles: obstacles
+      gun_heat: @gun_heat
+      life: @life
+      muzzle_speed: MUZZLE_SPEED
+      closest: -> 
+        return radar[0] if radar.length is 1
+        dists = radar.map ((op) -> {dist:Math.pow(op.x - tank.x, 2) + Math.pow(op.y - tank.y, 2), op:op})
+        dists.sort((a, b) -> a.dist - b.dist)[0].op
+    [state, controller]
 
 class Bullet
   constructor: (@tank, @power) ->
