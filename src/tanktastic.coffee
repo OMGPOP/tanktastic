@@ -77,7 +77,7 @@ class root.tanktastic.Game
 
   init: -> 
     @resolve_tank_obstacles @tanks
-    tank.init @tanks.length - 1 for tank in @tanks
+    tank.init tank.to_state(@radar(tank, tanks), @obstacle_state())[0] for tank in @tanks
 
   step: (discrete=false) ->
     tanks = @tanks.filter (tank) -> tank.life > 0
@@ -107,6 +107,7 @@ class root.tanktastic.Game
     dy = tank.y - scanner.y
     dist = Math.max(Math.sqrt(dx * dx + dy * dy) - (tank.r + scanner.r), 1)
     sigma = GAMMA * Math.log(dist) / LOG_10
+    console.log @grng.random(0,sigma)
     x: tank.x + @grng.random(0, sigma)
     y: tank.y + @grng.random(0, sigma)
 
@@ -243,7 +244,7 @@ class Tank
   step: (dt, radar, obstacles) -> 
     @fx = @fy = @dbearing = 0
     [state, controller] = @to_state radar, obstacles
-    @step_target.apply(null, [dt, state, controller])
+    @step_target dt, state, controller
     @ticks++
 
   to_state: (radar, obstacles) ->
