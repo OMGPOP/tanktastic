@@ -23,6 +23,23 @@ GAMMA = 1/3
 limit = (x, min, max) -> Math.max(min, Math.min(x, max))
 rand = (min, range) -> min + Math.random() * range
 
+class GaussRNG
+  constructor: ->
+    @v1 = @v2 = @s = @phase = 0
+
+  random: (mu, sigma) ->
+    if @phase is 0
+      loop
+        @v1 = 2 * Math.random() - 1
+        @v2 = 2 * Math.random() - 1
+        @s = @v1 * @v1 + @v2 * @v2
+        break unless @s >= 1 or @s is 0
+      x = @v1 * Math.sqrt(-2 * Math.log(@s) / @s)
+    else
+      x = @v2 * Math.sqrt(-2 * Math.log(@s) / @s)
+    @phase = 1 - @phase
+    return mu + sigma * x
+
 class root.tanktastic.Game
 
   dt: 1/60
@@ -327,23 +344,3 @@ class Renderer
     life = Math.max tank.life, 0
     @graphics.rect(tank.x + 7, tank.y - 20, 18 * life / 100, 4)
     @graphics.endFill()
-
-class GaussRNG
-  constructor: ->
-    @v1 = @v2 = @s = @phase = 0
-
-  random: (mu, sigma) ->
-    if @phase is 0
-      loop
-        @v1 = 2 * Math.random() - 1
-        @v2 = 2 * Math.random() - 1
-        @s = @v1 * @v1 + @v2 * @v2
-        break unless @s >= 1 or @s is 0
-      x = @v1 * Math.sqrt(-2 * Math.log(@s) / @s)
-    else
-      x = @v2 * Math.sqrt(-2 * Math.log(@s) / @s)
-    @phase = 1 - @phase
-    return mu + sigma * x
-
-
-
