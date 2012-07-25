@@ -47,7 +47,7 @@ Note that ```step``` takes 3 arguments: ```dt```, ```state``` and ```controller`
 2. ```y```: position of your tank along the y-axis (pixels)
 3. ```w```: the total width of the rectangular arena (constant)
 4. ```h```: the total height of the arena (constant)
-5. ```radius```: your tank's radius
+5. ```radius```: your tank's radius (constant)
 6. ```vx```: your tank's speed along the x-axis (pixels per second)
 7. ```vy```: your tank's speed along the y-axis (pixels per second)
 8. ```bearing```: your tank's turret orientation (in radians)
