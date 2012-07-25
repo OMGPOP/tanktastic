@@ -4,8 +4,6 @@ root.tanktastic = {}
 WIDTH = 960
 HEIGHT = 480
 
-MAX_DBEARING = Math.PI
-
 MAX_ITERATIONS = 10000
 
 MIN_FIRE_POWER = 0.1
@@ -13,6 +11,9 @@ MAX_FIRE_POWER = 3.0
 
 MAX_SPEED  = 120.0 # pixels/second
 MAX_SPEED2 = MAX_SPEED * MAX_SPEED
+
+MAX_FORCE = (MAX_SPEED * 60) / 4
+MAX_FORCE2 = MAX_FORCE * MAX_FORCE
 
 DRAG = 0.05
 MUZZLE_SPEED = 400
@@ -77,7 +78,7 @@ class root.tanktastic.Game
 
   init: -> 
     @resolve_tank_obstacles @tanks
-    tank.init tank.to_state(@radar(tank, tanks), @obstacle_state())[0] for tank in @tanks
+    tank.init tank.to_state(@radar(tank, @tanks), @obstacle_state())[0] for tank in @tanks
 
   step: (discrete=false) ->
     tanks = @tanks.filter (tank) -> tank.life > 0
@@ -118,6 +119,11 @@ class root.tanktastic.Game
       bullet.y += bullet.vy * @dt
 
     for tank in tanks
+      f = tank.fx * tank.fx + tank.fy * tank.fy
+      if f > MAX_FORCE2
+        f = Math.sqrt f
+        tank.fx *= MAX_FORCE / f
+        tank.fy *= MAX_FORCE / f
       # adds drag
       tank.fx -= tank.vx * DRAG
       tank.fy -= tank.vy * DRAG
