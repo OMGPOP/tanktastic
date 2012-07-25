@@ -81,9 +81,8 @@ class root.tanktastic.Game
     tank.init tank.to_state(@radar(tank, @tanks), @obstacle_state())[0] for tank in @tanks
 
   step: (discrete=false) ->
-    tanks = @tanks.filter (tank) -> tank.life > 0
     now = new Date().getTime()
-    tank.hit = false for tank in tanks
+    tank.hit = false for tank in @tanks
     if (not discrete) and @is_rendered()
       @lt = now unless @lt > 0
       dt = (now - @lt) / 1000.0
@@ -91,6 +90,8 @@ class root.tanktastic.Game
     else
       @a = @dt
     until @a < @dt
+      tanks = @tanks.filter (tank) -> tank.life > 0
+      break if @is_complete()
       tank.step @dt, @radar(tank, tanks), @obstacle_state() for tank in tanks
       @fire tanks
       @integrate tanks
@@ -244,7 +245,8 @@ class Tank
     @life = 100
     @bearing = Math.random() * 2 * Math.PI
 
-  init: (num_tanks) -> @init_target num_tanks if @init_target
+  init: (state) -> 
+    @init_target state if @init_target
 
   step: (dt, radar, obstacles) -> 
     @fx = @fy = @dbearing = 0
@@ -287,7 +289,7 @@ class Bullet
     i = Math.cos @tank.bearing
     j = Math.sin @tank.bearing
     @r = 2 + @power
-    @power = Math.exp(@power) - 1/3#Math.pow(2,@power + 1) / 2 #Math.pow(1 + @power / 2, 2) * Math.sqrt(@power) 
+    @power = Math.exp(@power) - 1/3
     @x = @tank.x + i * (tank.r + @r - 6)
     @y = @tank.y + j * (tank.r + @r - 6)
     @vx = i * MUZZLE_SPEED

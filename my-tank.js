@@ -4,6 +4,7 @@
 
   exports.init = function(state)
   {
+    debugger;
     // optional
     // pre-game; initialize whatevs
   }
