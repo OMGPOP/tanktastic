@@ -59,7 +59,7 @@ Note that ```step``` takes 3 arguments: ```dt```, ```state``` and ```controller`
 
 The only property that might not be self-explanatory is ```gun_heat```. Your gun must be completely cool to fire. When you shoot, your gun heats up according to how powerful the shot is.
 
-```state``` also defines a convenience method ```closest```, which gets the closest scanned tank in ```state.radar```.
+```state``` also defines a convenience method, ```closest```, which gets the closest scanned tank in ```state.radar```.
 
 The methods defined on ```controller``` to control your tank are:
 
