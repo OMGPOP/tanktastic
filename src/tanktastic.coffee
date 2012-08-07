@@ -9,7 +9,7 @@ MAX_ITERATIONS = 10000
 MIN_FIRE_POWER = 0.1
 MAX_FIRE_POWER = 3.0
 
-MAX_SPEED  = 120.0 # pixels/second
+MAX_SPEED  = 220.0 # pixels/second
 MAX_SPEED2 = MAX_SPEED * MAX_SPEED
 
 MAX_FORCE = (MAX_SPEED * 60) / 4
@@ -23,6 +23,7 @@ GAMMA = 1/3
 
 limit = (x, min, max) -> Math.max(min, Math.min(x, max))
 rand = (min, range) -> min + Math.random() * range
+unNaN = (x) -> if isNaN(x) then 0 else x
 
 class GaussRNG
   constructor: ->
@@ -141,7 +142,7 @@ class root.tanktastic.Game
 
   fire: (tanks) ->
     for tank in tanks
-      if tank.gun_heat <= 0
+      if tank.gun_heat <= 0 and tank.fire_command >= MIN_FIRE_POWER
         bullet = new Bullet(tank, tank.fire_command)
         tank.gun_heat += tank.fire_command
         @bullets.push bullet
@@ -260,10 +261,10 @@ class Tank
     controller = 
       set_bearing: (bearing) => tank.bearing = bearing
       exert: (fx, fy) =>
-        tank.fx += fx
-        tank.fy += fy
-      fire: (power) => tank.fire_command = limit power, MIN_FIRE_POWER, MAX_FIRE_POWER
-      aim_at: (x, y) => tank.bearing = Math.atan2(y - @y, x - @x)
+        tank.fx += unNaN fx
+        tank.fy += unNaN fy 
+      fire: (power) => tank.fire_command = limit unNaN(power), MIN_FIRE_POWER, MAX_FIRE_POWER
+      aim_at: (x, y) => tank.bearing = Math.atan2(unNaN(y) - @y, unNaN(x) - @x)
     state = 
       x: @x
       y: @y
