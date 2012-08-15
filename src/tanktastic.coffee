@@ -256,14 +256,15 @@ class Tank
     @ticks++
 
   to_state: (radar, obstacles) ->
-    @fx = @fy = @dbearing = @fire_command = 0.0
+    @fx = @fy = @dbearing = 0.0
     tank = this
     controller = 
       set_bearing: (bearing) => tank.bearing = bearing
       exert: (fx, fy) =>
         tank.fx += unNaN fx
         tank.fy += unNaN fy 
-      fire: (power) => tank.fire_command = limit unNaN(power), MIN_FIRE_POWER, MAX_FIRE_POWER
+      fire: (power) => 
+        if power is 0 then tank.fire_command = 0 else tank.fire_command = limit unNaN(power), MIN_FIRE_POWER, MAX_FIRE_POWER
       aim_at: (x, y) => tank.bearing = Math.atan2(unNaN(y) - @y, unNaN(x) - @x)
     state = 
       x: @x
