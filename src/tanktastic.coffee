@@ -256,7 +256,7 @@ class Tank
     @ticks++
 
   to_state: (radar, obstacles) ->
-    @fx = @fy = @dbearing = 0.0
+    @fx = @fy = @dbearing = @fire_command = 0.0
     tank = this
     controller = 
       set_bearing: (bearing) => tank.bearing = bearing
